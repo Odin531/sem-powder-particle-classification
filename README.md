@@ -34,17 +34,41 @@ The updated model architecture achieves **95.56% 5-fold cross-validation accurac
 - **Shape Moments & Spatial Descriptors**: Hu moments and Local Binary Patterns (LBP) capturing particle boundary curvature.
 - **Calibrated Ensemble Classifier**: Standard-scaled soft-voting ensemble combining Calibrated Ridge Classifier, Logistic Regression, and Linear Support Vector Machine (SVM).
 
-### Run locally
+### Build and run locally
 
-Use Python 3.10 or newer (tested on Python 3.13):
+Use Python 3.10 or newer (tested on Python 3.13). The frontend is served directly from `static/`, so it does not need a separate Node.js build. The Python build process trains the image classifier and saves it to `artifacts/material_classifier.joblib`.
 
-```powershell
-py -3.13 -m pip install -r requirements.txt
-py -3.13 train.py
-py -3.13 -m uvicorn app:app --reload
-```
+1. Clone the repository and enter its directory:
 
-Open <http://127.0.0.1:8000> in your browser. The training script evaluates the model with 5-fold stratified cross-validation and serializes the classifier to `artifacts/material_classifier.joblib`.
+   ```powershell
+   git clone https://github.com/Odin531/sem-powder-particle-classification.git
+   cd sem-powder-particle-classification
+   ```
+
+2. Create and activate a virtual environment, then install the dependencies:
+
+   ```powershell
+   py -3 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+3. Build the classifier:
+
+   ```powershell
+   python train.py
+   ```
+
+   Training reads the labeled images from `SEM/Al/`, `SEM/Steel/`, and `SEM/Ti/`, extracts image features, evaluates the classifier with 5-fold stratified cross-validation, and writes the trained model to `artifacts/material_classifier.joblib`. Each class needs at least five images.
+
+4. Start the web app:
+
+   ```powershell
+   python -m uvicorn app:app --reload
+   ```
+
+   Open <http://127.0.0.1:8000> in your browser. If the model artifact does not exist, the app trains and saves it when it starts; run `python train.py` first to build it explicitly. Stop the local server with **Ctrl+C**.
 
 ### Web Interface Features
 
